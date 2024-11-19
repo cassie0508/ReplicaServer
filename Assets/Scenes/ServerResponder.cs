@@ -9,12 +9,17 @@ using System.Linq;
 using UnityEngine.Playables;
 using PubSub;
 using System.Reflection;
+using TMPro;
+using UnityEngine.UI;
 
 public class ServerResponder : MonoBehaviour
 {
     [Header("Network Settings")]
     [SerializeField] private string port = "12345";
     private ResponseSocket responseSocket;
+
+    [Header("UI Display")]
+    public RawImage ConnectionIndicator;
 
     [Header("ReadOnly and exposed for Debugging")]
     [SerializeField] protected Texture2D DepthImage;
@@ -41,6 +46,7 @@ public class ServerResponder : MonoBehaviour
             responseSocket = new ResponseSocket();
             responseSocket.Bind($"tcp://*:{port}");
             Debug.Log("Successfully bound socket port " + port);
+            ConnectionIndicator.color = Color.green;
         }
         catch (Exception ex)
         {
