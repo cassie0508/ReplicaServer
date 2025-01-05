@@ -11,6 +11,8 @@ using PubSub;
 using System.Reflection;
 using TMPro;
 using UnityEngine.UI;
+using Vuforia;
+using UnityEngine.UIElements;
 
 public class ServerResponder : MonoBehaviour
 {
@@ -25,6 +27,16 @@ public class ServerResponder : MonoBehaviour
     [SerializeField] protected Texture2D DepthImage;
     [SerializeField] protected Texture2D ColorInDepthImage;
 
+    [Header("AR Camera Settings")]
+    [SerializeField] private GameObject arCamera;
+    [SerializeField] private GameObject imageTarget;
+    [SerializeField] private GameObject model;
+    private Matrix4x4 modelToCameraMatrix;
+
+    [Header("Mode Selection")]
+    [SerializeField] private Mode selectedMode;
+    private enum Mode { Calibration, Play }
+
     private Device _Device;
     private Transformation kinectCalibration;
 
@@ -34,8 +46,26 @@ public class ServerResponder : MonoBehaviour
 
     private void Start()
     {
-        InitializeSocket();
-        StartCoroutine(CameraCaptureReplica());
+        if (selectedMode == Mode.Calibration)
+        {
+            // TODO: Manually disable Vuforia Delayed Initialization
+
+            StartCoroutine(DetectAndTrackImageTarget());
+        }
+        else if (selectedMode == Mode.Play)
+        {
+            // TODO: Manually enable Vuforia Delayed Initialization
+
+            // Disable Image Target
+            if (imageTarget != null)
+            {
+                imageTarget.SetActive(false);
+                Debug.Log("Image Target disabled");
+            }
+
+            InitializeSocket();
+            StartCoroutine(CameraCaptureReplica());
+        }
     }
 
     private void InitializeSocket()
@@ -52,6 +82,39 @@ public class ServerResponder : MonoBehaviour
         {
             Debug.LogError($"Failed to bind socket: {ex.Message}");
         }
+    }
+
+    private IEnumerator DetectAndTrackImageTarget()
+    {
+        // Wait until the Image Target is detected
+        ObserverBehaviour targetObserver = imageTarget.GetComponent<ObserverBehaviour>();
+        if (targetObserver == null)
+        {
+            Debug.LogError("Image Target does not have ObserverBehaviour attached.");
+            yield break;
+        }
+
+        Debug.Log("Waiting for Image Target to be tracked...");
+
+        // Wait for Image Target to start tracking
+        while (targetObserver.TargetStatus.Status != Status.TRACKED)
+        {
+            yield return null;
+        }
+
+        Debug.Log("Image Target detected. Starting to track...");
+
+        // Continuously update the modelToCameraMatrix while the target is tracked
+        while (targetObserver.TargetStatus.Status == Status.TRACKED)
+        {
+            // Retrieve and update the relative matrix of Model to Camera
+            modelToCameraMatrix = arCamera.transform.worldToLocalMatrix * model.transform.localToWorldMatrix;
+            Debug.Log(modelToCameraMatrix);
+
+            yield return null; // Wait for the next frame
+        }
+
+        Debug.Log("Image Target is no longer tracked. Stopping updates.");
     }
 
     private IEnumerator CameraCaptureReplica()

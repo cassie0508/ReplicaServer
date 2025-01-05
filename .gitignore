@@ -12,6 +12,9 @@ Build2/
 BuildReplica/
 BuildMirror/
 
+Packages/
+Assets/Editor/
+
 # Visual Studio cache directory
 .vs/
 *.vsconfig
@@ -50,5 +53,12 @@ Assets/Kinect4Azure/Plugins/*.meta
 # Input File
 *.mkv
 *.mkv.meta
+
+# Ignore specific files
+*.collabignore
+*.glb
+*.glb.meta
+*.fbx
+*.fbx.meta
 
 
