@@ -182,7 +182,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4944169696211781832, guid: 0557d41f33377004794e579fa59bab7b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 155201408}
+      addedObject: {fileID: 155201409}
   m_SourcePrefab: {fileID: 100100000, guid: 0557d41f33377004794e579fa59bab7b, type: 3}
 --- !u!1 &155201403 stripped
 GameObject:
@@ -200,7 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: -1631628248, guid: 8a9a760f95896c34689febc965510927, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &155201408
+--- !u!114 &155201409
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -219,6 +219,11 @@ MonoBehaviour:
   mCastedBehaviour: {fileID: 155201406}
   mMeshFilter: {fileID: 0}
   mMeshRenderer: {fileID: 0}
+--- !u!1 &718378123 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7508305324232512974, guid: 0557d41f33377004794e579fa59bab7b, type: 3}
+  m_PrefabInstance: {fileID: 155201402}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,11 +331,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mWorldCenterMode: 2
   mWorldCenter: {fileID: 0}
---- !u!1 &1059600331 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3512792548354393960, guid: 0557d41f33377004794e579fa59bab7b, type: 3}
-  m_PrefabInstance: {fileID: 155201402}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1212187067
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,8 +468,8 @@ MonoBehaviour:
   ColorInDepthImage: {fileID: 0}
   arCamera: {fileID: 963194225}
   imageTarget: {fileID: 155201403}
-  model: {fileID: 1059600331}
-  selectedMode: 1
+  model: {fileID: 718378123}
+  selectedMode: 0
 --- !u!4 &1364004191
 Transform:
   m_ObjectHideFlags: 0

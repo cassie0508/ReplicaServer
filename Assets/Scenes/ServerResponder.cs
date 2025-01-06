@@ -46,6 +46,7 @@ public class ServerResponder : MonoBehaviour
 
     private void Start()
     {
+        // TODO: use two scripts for two modes
         if (selectedMode == Mode.Calibration)
         {
             // TODO: Manually disable Vuforia Delayed Initialization
@@ -107,9 +108,13 @@ public class ServerResponder : MonoBehaviour
         // Continuously update the modelToCameraMatrix while the target is tracked
         while (targetObserver.TargetStatus.Status == Status.TRACKED)
         {
-            // Retrieve and update the relative matrix of Model to Camera
-            modelToCameraMatrix = arCamera.transform.worldToLocalMatrix * model.transform.localToWorldMatrix;
-            Debug.Log(modelToCameraMatrix);
+            Matrix4x4 camera2marker = imageTarget.transform.worldToLocalMatrix * arCamera.transform.localToWorldMatrix;
+            Debug.Log("camera2marker");
+            Debug.Log(camera2marker);
+
+            Matrix4x4 modelInKinect = model.transform.localToWorldMatrix;
+            Debug.Log("modelInKinect");
+            Debug.Log(modelInKinect);
 
             yield return null; // Wait for the next frame
         }
