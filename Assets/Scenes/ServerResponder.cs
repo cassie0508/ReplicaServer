@@ -85,6 +85,7 @@ public class ServerResponder : MonoBehaviour
         }
     }
 
+    public Transform DebugObject;
     private IEnumerator DetectAndTrackImageTarget()
     {
         // Wait until the Image Target is detected
@@ -108,9 +109,21 @@ public class ServerResponder : MonoBehaviour
         // Continuously update the modelToCameraMatrix while the target is tracked
         while (targetObserver.TargetStatus.Status == Status.TRACKED)
         {
-            Matrix4x4 camera2marker = imageTarget.transform.worldToLocalMatrix * arCamera.transform.localToWorldMatrix;
-            Debug.Log("camera2marker");
-            Debug.Log(camera2marker);
+            Matrix4x4 O2image = Matrix4x4.TRS(imageTarget.transform.position, imageTarget.transform.rotation, Vector3.one);
+            Matrix4x4 O2cam = Matrix4x4.TRS(arCamera.transform.position, arCamera.transform.rotation, Vector3.one);
+
+            Matrix4x4 marker2kinect = O2image.inverse * O2cam;
+            
+            Matrix4x4 world2Marker = arCamera.transform.localToWorldMatrix * marker2kinect.inverse;
+
+            if (DebugObject)
+                DebugObject.SetPositionAndRotation(world2Marker.GetPosition(), world2Marker.rotation);
+
+            Debug.Log("marker2kinect");
+            Debug.Log(marker2kinect);
+
+            Debug.Log("cameraInKinect");
+            Debug.Log(arCamera.transform.localToWorldMatrix);
 
             Matrix4x4 modelInKinect = model.transform.localToWorldMatrix;
             Debug.Log("modelInKinect");
