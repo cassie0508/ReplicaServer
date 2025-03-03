@@ -51,14 +51,14 @@ public class NewBehaviourScript : MonoBehaviour
     {
         if (targetObserver.TargetStatus.Status == Status.TRACKED)
         {
-            Matrix4x4 O2image = Matrix4x4.TRS(imageTarget.transform.position, imageTarget.transform.rotation, Vector3.one);
-            Matrix4x4 O2cam = Matrix4x4.TRS(arCamera.transform.position, arCamera.transform.rotation, Vector3.one);
+            Matrix4x4 O2Marker = Matrix4x4.TRS(imageTarget.transform.position, imageTarget.transform.rotation, Vector3.one);
+            Matrix4x4 O2Kinect = Matrix4x4.TRS(arCamera.transform.position, arCamera.transform.rotation, Vector3.one);
 
-            Matrix4x4 marker2kinect = O2image.inverse * O2cam;
+            Matrix4x4 Marker2Kinect = O2Marker.inverse * O2Kinect;
 
-            Matrix4x4 world2Marker = arCamera.transform.localToWorldMatrix * marker2kinect.inverse;
+            //Matrix4x4 world2Marker = arCamera.transform.localToWorldMatrix * Marker2Kinect.inverse;
 
-            byte[] matrixData = Matrix4x4ToByteArray(marker2kinect);
+            byte[] matrixData = Matrix4x4ToByteArray(Marker2Kinect);
 
             PublishData("Calibration", matrixData);
         }

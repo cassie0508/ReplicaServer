@@ -27,16 +27,6 @@ public class ServerResponder : MonoBehaviour
     [SerializeField] protected Texture2D DepthImage;
     [SerializeField] protected Texture2D ColorInDepthImage;
 
-    [Header("AR Camera Settings")]
-    [SerializeField] private GameObject arCamera;
-    [SerializeField] private GameObject imageTarget;
-    [SerializeField] private GameObject model;
-    private Matrix4x4 modelToCameraMatrix;
-
-    [Header("Mode Selection")]
-    [SerializeField] private Mode selectedMode;
-    private enum Mode { Calibration, Play }
-
     private Device _Device;
     private Transformation kinectCalibration;
 
@@ -46,27 +36,8 @@ public class ServerResponder : MonoBehaviour
 
     private void Start()
     {
-        // TODO: use two scripts for two modes
-        if (selectedMode == Mode.Calibration)
-        {
-            // TODO: Manually disable Vuforia Delayed Initialization
-
-            StartCoroutine(DetectAndTrackImageTarget());
-        }
-        else if (selectedMode == Mode.Play)
-        {
-            // TODO: Manually enable Vuforia Delayed Initialization
-
-            // Disable Image Target
-            if (imageTarget != null)
-            {
-                imageTarget.SetActive(false);
-                Debug.Log("Image Target disabled");
-            }
-
-            InitializeSocket();
-            StartCoroutine(CameraCaptureReplica());
-        }
+        InitializeSocket();
+        StartCoroutine(CameraCaptureReplica());
     }
 
     private void InitializeSocket()
@@ -83,56 +54,6 @@ public class ServerResponder : MonoBehaviour
         {
             Debug.LogError($"Failed to bind socket: {ex.Message}");
         }
-    }
-
-    public Transform DebugObject;
-    private IEnumerator DetectAndTrackImageTarget()
-    {
-        // Wait until the Image Target is detected
-        ObserverBehaviour targetObserver = imageTarget.GetComponent<ObserverBehaviour>();
-        if (targetObserver == null)
-        {
-            Debug.LogError("Image Target does not have ObserverBehaviour attached.");
-            yield break;
-        }
-
-        Debug.Log("Waiting for Image Target to be tracked...");
-
-        // Wait for Image Target to start tracking
-        while (targetObserver.TargetStatus.Status != Status.TRACKED)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Image Target detected. Starting to track...");
-
-        // Continuously update the modelToCameraMatrix while the target is tracked
-        while (targetObserver.TargetStatus.Status == Status.TRACKED)
-        {
-            Matrix4x4 O2image = Matrix4x4.TRS(imageTarget.transform.position, imageTarget.transform.rotation, Vector3.one);
-            Matrix4x4 O2cam = Matrix4x4.TRS(arCamera.transform.position, arCamera.transform.rotation, Vector3.one);
-
-            Matrix4x4 marker2kinect = O2image.inverse * O2cam;
-            
-            Matrix4x4 world2Marker = arCamera.transform.localToWorldMatrix * marker2kinect.inverse;
-
-            if (DebugObject)
-                DebugObject.SetPositionAndRotation(world2Marker.GetPosition(), world2Marker.rotation);
-
-            Debug.Log("marker2kinect");
-            Debug.Log(marker2kinect);
-
-            Debug.Log("cameraInKinect");
-            Debug.Log(arCamera.transform.localToWorldMatrix);
-
-            Matrix4x4 modelInKinect = model.transform.localToWorldMatrix;
-            Debug.Log("modelInKinect");
-            Debug.Log(modelInKinect);
-
-            yield return null; // Wait for the next frame
-        }
-
-        Debug.Log("Image Target is no longer tracked. Stopping updates.");
     }
 
     private IEnumerator CameraCaptureReplica()
@@ -240,7 +161,7 @@ public class ServerResponder : MonoBehaviour
         Buffer.BlockCopy(calibrationData, 0, cameraData, sizeof(int) * 2, calibrationData.Length);
         Buffer.BlockCopy(cameraSizeData, 0, cameraData, sizeof(int) * 2 + calibrationData.Length, cameraSizeData.Length);
 
-        responseSocket.SendFrame(cameraData); // [calibrationData.Length][cameraSizeData.Length][calibrationData][cameraSizeData]
+        responseSocket.SendFrame(cameraData);  // [calibrationData.Length][cameraSizeData.Length][calibrationData][cameraSizeData]
     }
 
     private void SendLookupData(int part)
@@ -361,9 +282,14 @@ public class ServerResponder : MonoBehaviour
     private void OnDestroy()
     {
         Debug.Log("Closing socket on port " + port);
-        responseSocket.Dispose();
+        if (responseSocket != null)
+        {
+            responseSocket.Close();
+            responseSocket.Dispose();
+            responseSocket = null;
+        }
+
         NetMQConfig.Cleanup(false);
-        responseSocket = null;
 
         StopAllCoroutines();
         Task.WaitAny(Task.Delay(1000));
@@ -372,6 +298,7 @@ public class ServerResponder : MonoBehaviour
         {
             _Device.StopCameras();
             _Device.Dispose();
+            _Device = null;
         }
     }
 }
