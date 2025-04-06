@@ -84,7 +84,7 @@ public class ServerResponder : MonoBehaviour
         };
 
         _Device.StartCameras(configuration);
-        
+
         if (!SetupTextures(ref DepthImage, ref ColorInDepthImage))
         {
             Debug.LogError("CameraCaptureReplica(): Something went wrong while setting up camera textures");
